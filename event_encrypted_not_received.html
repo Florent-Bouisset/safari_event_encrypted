@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head></head>
+    <body>
+        <h1>Attaching media key before loading video</h1>
+        <p><a href="./event_encrypted_received.html">Not attaching media key before loading video</a></p>
+        <video id="vid" controls width="600"></video>
+        <div style="border: solid 1px black; min-height: 100px;">
+            <code id="logs">Logs:</code>
+        </div>
+
+        <script> 
+        ( async () => {
+        vid.addEventListener('encrypted', () => logs.innerText += "\nreceived encrypted event")
+        vid.addEventListener('webkitneedkey', () => logs.innerText +="\nreceived needkey event")
+
+        const configurations = [{
+            audioCapabilities: [ { contentType: "audio/mp4;codecs=\"mp4a.40.2\"" },
+                                { contentType: "audio/webm;codecs=opus" } ],
+            distinctiveIdentifier: "optional",
+            initDataTypes: ["cenc", "skd"],
+            persistentState: "optional",
+            sessionTypes: ["temporary"],
+            videoCapabilities: [ { contentType: "video/mp4;codecs=\"avc1.4d401e\"" },
+                                { contentType: "video/mp4;codecs=\"avc1.42e01e\"" },
+                                { contentType: "video/webm;codecs=\"vp8\"" } ],
+        }];
+
+        let mediaKeySystemAccess;
+        let mediaKeys;
+        mediaKeySystemAccess = await navigator.requestMediaKeySystemAccess("com.apple.fps", configurations);
+        mediaKeys = await mediaKeySystemAccess.createMediaKeys()
+        vid.setMediaKeys(mediaKeys); 
+        
+        // this is an encrypted media stream
+        vid.src = "https://na-fps.ezdrm.com/demo/ezdrm/master.m3u8";
+        })()
+        
+        </script>
+    </body>
+</html>
+
